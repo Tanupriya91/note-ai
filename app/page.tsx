@@ -1,69 +1,131 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+const SAMPLE_NOTES = `An API (Application Programming Interface) allows different software applications to communicate with each other.
+
+APIs define a set of rules and protocols that applications can use to request and exchange data. REST APIs commonly use HTTP methods such as GET, POST, PUT, and DELETE.
+
+For example, a frontend application can send a GET request to a backend API to retrieve user information. The backend processes the request and returns a response, usually in JSON format.
+
+APIs are widely used in web applications, mobile applications, payment systems, and third-party integrations.`;
 
 export default function Home() {
+  const [notes, setNotes] = useState("");
+
+  const wordCount = notes.trim()
+    ? notes.trim().split(/\s+/).length
+    : 0;
+
+  const characterCount = notes.length;
+
+  const handleClear = () => {
+    setNotes("");
+  };
+
+  const handleSampleNotes = () => {
+    setNotes(SAMPLE_NOTES);
+  };
+
+  const handleSummarize = () => {
+    console.log("Summarize:", notes);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
+        {/* Header */}
+        <header className="mb-10 text-center">
+          <div className="mb-4 inline-flex rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300">
+            AI-Powered Notes
+          </div>
+
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            AI Notes Summarizer
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
+            Turn long and messy notes into clean summaries, important
+            keywords, and beginner-friendly explanations.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </header>
+
+        {/* Input Card */}
+        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:p-7">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Your Notes</h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Paste your notes below and let AI organize them.
+              </p>
+            </div>
+
+            <span className="hidden rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-400 sm:block">
+              {wordCount} words
+            </span>
+          </div>
+
+          <textarea
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            placeholder="Paste your notes here..."
+            className="min-h-[300px] w-full resize-y rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-slate-500"
+          />
+
+          {/* Stats */}
+          <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+            <span>{characterCount} characters</span>
+            <span>{wordCount} words</span>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <div className="flex gap-3">
+              <button
+                onClick={handleSampleNotes}
+                type="button"
+                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+              >
+                Sample Notes
+              </button>
+
+              <button
+                onClick={handleClear}
+                type="button"
+                disabled={!notes}
+                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Clear
+              </button>
+            </div>
+
+            <button
+              onClick={handleSummarize}
+              type="button"
+              disabled={!notes.trim()}
+              className="rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Summarize Notes
+            </button>
+          </div>
+        </section>
+
+        {/* Empty Result State */}
+        <section className="mt-8 rounded-2xl border border-dashed border-slate-800 p-10 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-xl">
+            ✨
+          </div>
+
+          <h2 className="font-semibold text-slate-200">
+            Your summary will appear here
+          </h2>
+
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+            Add your notes above and click &quot;Summarize Notes&quot; to
+            generate an AI-powered summary.
+          </p>
+        </section>
+      </div>
+    </main>
   );
 }
