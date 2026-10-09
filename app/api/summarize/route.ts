@@ -116,6 +116,8 @@ ${notes}
 
     let result;
 
+    let result: unknown;
+
     try {
       result = JSON.parse(text);
     } catch {
@@ -125,7 +127,51 @@ ${notes}
       );
     }
 
-    return NextResponse.json(result);
+    if (
+      typeof result !== "object" ||
+      result === null ||
+      !("summary" in result) ||
+      !("keywords" in result) ||
+      !("simpleExplanation" in result)
+    ) {
+      return NextResponse.json(
+        { error: "The AI response is missing required fields." },
+        { status: 502 },
+      );
+    }
+
+    const data = result as {
+      summary: unknown;
+      keywords: unknown;
+      simpleExplanation: unknown;
+    };
+
+    const validSummary =
+      Array.isArray(data.summary) &&
+      data.summary.every((item) => typeof item === "string");
+
+    const validKeywords =
+      Array.isArray(data.keywords) &&
+      data.keywords.every(
+        (item) =>
+          typeof item === "object" &&
+          item !== null &&
+          "term" in item &&
+          typeof item.term === "string" &&
+          "meaning" in item &&
+          typeof item.meaning === "string",
+      );
+
+    const validExplanation = typeof data.simpleExplanation === "string";
+
+    if (!validSummary || !validKeywords || !validExplanation) {
+      return NextResponse.json(
+        { error: "The AI response has an invalid structure." },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Summarization error:", error);
 
