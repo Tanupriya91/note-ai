@@ -44,13 +44,23 @@ const responseSchema = {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let body: { notes?: unknown };
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Request body must be valid JSON." },
+        { status: 400 },
+      );
+    }
+
     const notes = body?.notes;
 
     if (typeof notes !== "string" || !notes.trim()) {
       return NextResponse.json(
         { error: "Notes are required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,7 +70,7 @@ export async function POST(request: Request) {
           error:
             "Notes are too long. Please keep them under 20,000 characters.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,7 +110,7 @@ ${notes}
     if (!text) {
       return NextResponse.json(
         { error: "The AI returned an empty response." },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -111,35 +121,33 @@ ${notes}
     } catch {
       return NextResponse.json(
         { error: "The AI returned an invalid response." },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
     return NextResponse.json(result);
-  
-} catch (error) {
-  console.error("Summarization error:", error);
+  } catch (error) {
+    console.error("Summarization error:", error);
 
-  const message =
-    error instanceof Error ? error.message : "";
+    const message = error instanceof Error ? error.message : "";
 
-  if (
-    message.toLowerCase().includes("prepayment credits") ||
-    message.includes("RESOURCE_EXHAUSTED") ||
-    message.includes("402")
-  ) {
+    if (
+      message.toLowerCase().includes("prepayment credits") ||
+      message.includes("RESOURCE_EXHAUSTED") ||
+      message.includes("402")
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "The AI service has no available credits. Please check your AI provider's billing and quota.",
+        },
+        { status: 402 },
+      );
+    }
+
     return NextResponse.json(
-      {
-        error:
-          "The AI service has no available credits. Please check your AI provider's billing and quota.",
-      },
-      { status: 402 }
+      { error: "Summarization failed. Please try again later." },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json(
-    { error: "Summarization failed. Please try again later." },
-    { status: 500 }
-  );
-}
 }
