@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,8 +11,18 @@ For example, a frontend application can send a GET request to a backend API to r
 
 APIs are widely used in web applications, mobile applications, payment systems, and third-party integrations.`;
 
+type SummaryResult = {
+  summary: string[];
+  keywords: { term: string; meaning: string }[];
+  simpleExplanation: string;
+};
+
 export default function Home() {
   const [notes, setNotes] = useState("");
+  const [result, setResult] = useState<SummaryResult | null>(null);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [copied, setCopied] = useState("");
 
   const wordCount = notes.trim()
     ? notes.trim().split(/\s+/).length
@@ -21,20 +32,75 @@ export default function Home() {
 
   const handleClear = () => {
     setNotes("");
+    setResult(null);
+    setError("");
+    setCopied("");
   };
 
   const handleSampleNotes = () => {
     setNotes(SAMPLE_NOTES);
+    setResult(null);
+    setError("");
+    setCopied("");
   };
 
-  const handleSummarize = () => {
-    console.log("Summarize:", notes);
+  const handleSummarize = async () => {
+    if (!notes.trim() || isLoading) return;
+
+    setIsLoading(true);
+    setResult(null);
+    setError("");
+    setCopied("");
+
+    try {
+      const response = await fetch("/api/summarize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notes }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to summarize your notes. Please try again."
+        );
+      }
+
+      if (
+        !Array.isArray(data.summary) ||
+        !Array.isArray(data.keywords) ||
+        typeof data.simpleExplanation !== "string"
+      ) {
+        throw new Error("The AI returned an unexpected response format.");
+      }
+
+      setResult(data as SummaryResult);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCopy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(label);
+    } catch {
+      setError("Could not copy to clipboard. Please try again.");
+    }
   };
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
-        {/* Header */}
         <header className="mb-10 text-center">
           <div className="mb-4 inline-flex rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300">
             AI-Powered Notes
@@ -50,7 +116,6 @@ export default function Home() {
           </p>
         </header>
 
-        {/* Input Card */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:p-7">
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -69,22 +134,22 @@ export default function Home() {
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
             placeholder="Paste your notes here..."
+            maxLength={20000}
             className="min-h-[300px] w-full resize-y rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-slate-500"
           />
 
-          {/* Stats */}
           <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-            <span>{characterCount} characters</span>
+            <span>{characterCount} / 20,000 characters</span>
             <span>{wordCount} words</span>
           </div>
 
-          {/* Actions */}
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
             <div className="flex gap-3">
               <button
                 onClick={handleSampleNotes}
                 type="button"
-                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+                disabled={isLoading}
+                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-40"
               >
                 Sample Notes
               </button>
@@ -92,7 +157,7 @@ export default function Home() {
               <button
                 onClick={handleClear}
                 type="button"
-                disabled={!notes}
+                disabled={!notes && !result && !error || isLoading}
                 className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Clear
@@ -102,29 +167,121 @@ export default function Home() {
             <button
               onClick={handleSummarize}
               type="button"
-              disabled={!notes.trim()}
+              disabled={!notes.trim() || isLoading}
               className="rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Summarize Notes
+              {isLoading ? "Summarizing..." : "Summarize Notes"}
             </button>
           </div>
         </section>
 
-        {/* Empty Result State */}
-        <section className="mt-8 rounded-2xl border border-dashed border-slate-800 p-10 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-xl">
-            ✨
+        {isLoading && (
+          <section
+            role="status"
+            className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center"
+          >
+            <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-2 border-slate-600 border-t-white" />
+            <p className="text-sm text-slate-300">
+              Analyzing your notes...
+            </p>
+          </section>
+        )}
+
+        {error && !isLoading && (
+          <section
+            role="alert"
+            className="mt-8 rounded-2xl border border-red-900/70 bg-red-950/30 p-5"
+          >
+            <h2 className="font-semibold text-red-300">
+              Unable to summarize notes
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-red-200/80">
+              {error}
+            </p>
+          </section>
+        )}
+
+        {result && !isLoading && (
+          <div className="mt-8 space-y-5">
+            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold">Summary</h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleCopy(result.summary.join("\n"), "summary")
+                  }
+                  className="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
+                >
+                  {copied === "summary" ? "Copied!" : "Copy summary"}
+                </button>
+              </div>
+
+              <ul className="list-disc space-y-3 pl-5 text-sm leading-7 text-slate-300">
+                {result.summary.map((point, index) => (
+                  <li key={`${index}-${point}`}>{point}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold">Important Keywords</h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleCopy(
+                      result.keywords
+                        .map(({ term, meaning }) => `${term}: ${meaning}`)
+                        .join("\n"),
+                      "keywords"
+                    )
+                  }
+                  className="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
+                >
+                  {copied === "keywords" ? "Copied!" : "Copy keywords"}
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {result.keywords.map(({ term, meaning }, index) => (
+                  <div key={`${index}-${term}`}>
+                    <h3 className="font-medium text-slate-100">{term}</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                      {meaning}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+              <h2 className="mb-3 text-xl font-semibold">
+                Simple Explanation
+              </h2>
+              <p className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
+                {result.simpleExplanation}
+              </p>
+            </section>
           </div>
+        )}
 
-          <h2 className="font-semibold text-slate-200">
-            Your summary will appear here
-          </h2>
+        {!result && !error && !isLoading && (
+          <section className="mt-8 rounded-2xl border border-dashed border-slate-800 p-10 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-xl">
+              ✨
+            </div>
 
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-            Add your notes above and click &quot;Summarize Notes&quot; to
-            generate an AI-powered summary.
-          </p>
-        </section>
+            <h2 className="font-semibold text-slate-200">
+              Your summary will appear here
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+              Add your notes above and click &quot;Summarize Notes&quot; to
+              generate an AI-powered summary.
+            </p>
+          </section>
+        )}
       </div>
     </main>
   );
