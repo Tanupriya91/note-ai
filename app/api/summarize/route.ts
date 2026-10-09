@@ -114,8 +114,6 @@ ${notes}
       );
     }
 
-    let result;
-
     let result: unknown;
 
     try {
