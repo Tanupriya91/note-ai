@@ -1,6 +1,6 @@
-
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 const SAMPLE_NOTES = `An API (Application Programming Interface) allows different software applications to communicate with each other.
@@ -24,9 +24,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState("");
 
-  const wordCount = notes.trim()
-    ? notes.trim().split(/\s+/).length
-    : 0;
+  const wordCount = notes.trim() ? notes.trim().split(/\s+/).length : 0;
 
   const characterCount = notes.length;
 
@@ -63,7 +61,7 @@ export default function Home() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Unable to summarize your notes. Please try again."
+          data.error || "Unable to summarize your notes. Please try again.",
         );
       }
 
@@ -80,7 +78,7 @@ export default function Home() {
       setError(
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again."
+          : "Something went wrong. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -100,27 +98,27 @@ export default function Home() {
     <main className="min-h-screen bg-[#fafaf9] text-stone-800">
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <aside className="hidden w-64 shrink-0 border-r border-stone-200 bg-white px-5 py-6 md:flex md:flex-col">
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-900 text-lg text-white">
               N
             </span>
             <span className="text-base font-semibold tracking-tight">
               NoteMind
             </span>
-          </a>
+          </Link>
 
           <div className="mt-10">
             <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-400">
               Workspace
             </p>
-            <a
+            <Link
               href="/"
               aria-current="page"
               className="flex items-center gap-3 rounded-xl bg-stone-100 px-3 py-2.5 text-sm font-medium text-stone-900"
             >
               <span>⌂</span>
               Home
-            </a>
+            </Link>
             <div className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-stone-400">
               <span>◷</span>
               History
@@ -153,7 +151,9 @@ export default function Home() {
               </span>
               <span className="hidden md:inline">Workspace</span>
               <span className="hidden md:inline">/</span>
-              <span className="hidden md:inline text-stone-900">Summarizer</span>
+              <span className="hidden md:inline text-stone-900">
+                Summarizer
+              </span>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-stone-200 px-3 py-1.5 text-xs text-stone-600">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -208,7 +208,9 @@ export default function Home() {
                 <div className="flex items-center gap-3 text-xs text-stone-400">
                   <span>{wordCount} words</span>
                   <span className="text-stone-300">·</span>
-                  <span>{characterCount.toLocaleString()} / 20,000 characters</span>
+                  <span>
+                    {characterCount.toLocaleString()} / 20,000 characters
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -286,16 +288,20 @@ export default function Home() {
                           "",
                           "IMPORTANT KEYWORDS",
                           ...result.keywords.map(
-                            ({ term, meaning }) => `${term}: ${meaning}`
+                            ({ term, meaning }) => `${term}: ${meaning}`,
                           ),
                           "",
                           "SIMPLE EXPLANATION",
                           result.simpleExplanation,
-                        ].join("\n")
-                      , "all")}
+                        ].join("\n"),
+                        "all",
+                      )
+                    }
                     className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-600 transition hover:bg-stone-50"
                   >
-                    {copied === "all" ? "Copied all results!" : "Copy all results"}
+                    {copied === "all"
+                      ? "Copied all results!"
+                      : "Copy all results"}
                   </button>
                 </div>
 
@@ -357,7 +363,7 @@ export default function Home() {
                             result.keywords
                               .map(({ term, meaning }) => `${term}: ${meaning}`)
                               .join("\n"),
-                            "keywords"
+                            "keywords",
                           )
                         }
                         className="text-xs font-medium text-stone-500 hover:text-stone-900"
