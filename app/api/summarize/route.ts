@@ -1,16 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { NextResponse } from "next/server";
 
-const apiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY is not configured");
-}
-
-const ai = new GoogleGenAI({
-  apiKey,
-});
-
 const responseSchema = {
   type: Type.OBJECT,
   properties: {
@@ -74,6 +64,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      console.error("GEMINI_API_KEY is not configured.");
+      return NextResponse.json(
+        { error: "The AI service is not configured. Please try again later." },
+        { status: 500 },
+      );
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     const prompt = `
 You are an AI notes summarization assistant.
 
