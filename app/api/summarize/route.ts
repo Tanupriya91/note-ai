@@ -97,14 +97,39 @@ User notes:
 ${notes}
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema,
-      },
-    });
+    let response;
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash-lite",
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema,
+          },
+        });
+
+        break;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+
+        const isTemporary =
+          message.includes("503") ||
+          message.toLowerCase().includes("high demand") ||
+          message.includes("UNAVAILABLE");
+
+        if (!isTemporary || attempt === 3) {
+          throw error;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+      }
+    }
+
+    if (!response) {
+      throw new Error("Gemini did not return a response.");
+    }
 
     const text = response.text;
 
