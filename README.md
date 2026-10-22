@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Note AI — AI Notes Summarizer
 
-## Getting Started
+Note AI is a web application that helps you turn long notes into concise, easy-to-understand summaries. It uses AI to extract key points, identify important keywords, and explain complex information in simple language.
 
-First, run the development server:
+## 🌐 Live Demo
+
+**Deployed Website:** https://note-ai-summarizer.vercel.app/
+
+**GitHub Repository:** https://github.com/Tanupriya91/note-ai
+
+## ✨ Features
+
+- **AI-Powered Summarization:** Convert lengthy notes into concise summaries.
+- **Key Points Extraction:** Quickly understand the most important information.
+- **Keyword Identification:** Extract important terms with their meanings.
+- **Simple Explanations:** Understand complex topics in beginner-friendly language.
+- **Clean User Interface:** A minimal, distraction-free experience.
+- **Copy Results:** Easily copy generated summaries and explanations.
+- **Fast Processing:** Generate useful summaries using Google's Gemini API.
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **AI Integration:** Google Gemini API
+- **Deployment:** Vercel
+- **Package Manager:** pnpm
+
+## 🚀 Getting Started
+
+Follow these steps to run the project locally.
+
+### 1. Clone the Repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Tanupriya91/note-ai.git
+cd note-ai
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Configure Environment Variables
 
-## Learn More
+Create a `.env.local` file in the root directory and add your Gemini API key:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Get an API key from [Google AI Studio](https://aistudio.google.com/apikey).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Important:** Keep your API key private. Never commit `.env.local` or expose your API key in frontend code.
 
-## Deploy on Vercel
+### 4. Start the Development Server
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📁 Project Structure
+
+```text
+note-ai/
+├── app/
+│   ├── api/
+│   │   └── summarize/
+│   │       └── route.ts
+│   ├── page.tsx
+│   ├── layout.tsx
+│   └── globals.css
+├── public/
+├── .env.local
+├── package.json
+├── pnpm-lock.yaml
+├── tsconfig.json
+└── README.md
+```
+
+## 🔐 Environment Variables
+
+| Variable | Description |
+|---|---|
+| `GEMINI_API_KEY` | API key used by the server to access Google's Gemini API |
+
+Configure the same environment variable in your Vercel project settings before deploying.
+
+## 🌍 Deployment
+
+The application is deployed on Vercel.
+
+- **Live Application:** https://note-ai-summarizer.vercel.app/
+- **Source Code:** https://github.com/Tanupriya91/note-ai
+
+To deploy your own version, import the repository into Vercel, configure the required environment variables, and deploy the project.
+
+## 🎯 Purpose
+
+Note AI aims to make studying, revising, and understanding information easier by transforming lengthy notes into clear, structured, and beginner-friendly content.
+
+## 📄 License
+
+This project is available on GitHub. Add a license file if you intend to distribute it under a specific open-source license.
